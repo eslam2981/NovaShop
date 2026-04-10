@@ -62,7 +62,7 @@ export const remove = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
-export const getPublicStats = async (req: Request, res: Response, next: NextFunction) => {
+export const getPublicStats = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const stats = await getStoreStats();
     res.status(200).json({
