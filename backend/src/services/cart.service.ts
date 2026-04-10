@@ -14,6 +14,9 @@ export const addToCart = async (userId: string, productId: string, quantity: num
         userId,
         status: 'PENDING',
         total: 0,
+        shippingAddress: '{}',
+        paymentMethod: 'CASH',
+        discount: 0,
       },
       include: { items: true },
     });

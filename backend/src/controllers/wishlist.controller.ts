@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { addToWishlist, getWishlist, removeFromWishlist } from '../services/wishlist.service';
+import { safeParam } from '../utils/safeParam';
 
 const getUserId = (req: Request) => {
   const user = (req as any).user;
@@ -33,7 +34,7 @@ export const getItems = async (req: Request, res: Response, next: NextFunction) 
 export const removeItem = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = getUserId(req);
-    const wishlist = await removeFromWishlist(userId, req.params.productId);
+    const wishlist = await removeFromWishlist(userId, safeParam(req.params.productId));
     res.status(200).json({ status: 'success', data: { wishlist } });
   } catch (error) {
     next(error);

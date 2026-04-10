@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { productService, Product } from '@/services/product';
 import { categoryService, Category } from '@/services/category';
 import ProductCard from '@/components/ProductCard';
@@ -18,7 +18,6 @@ import {
 
 const ProductList = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -26,7 +25,7 @@ const ProductList = () => {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || '');
   const [sortBy, setSortBy] = useState<string>('createdAt');
-  const [sortOrder, setSortOrder] = useState<string>('desc');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const limit = 12;
@@ -78,38 +77,38 @@ const ProductList = () => {
     return () => clearTimeout(timeoutId);
   }, [search, selectedCategory, sortBy, sortOrder, page]);
 
-  const handleSort = (field: string, order: string) => {
+  const handleSort = (field: string, order: 'asc' | 'desc') => {
     setSortBy(field);
     setSortOrder(order);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-zinc-950">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-16 z-30 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-              <h1 className="text-2xl font-bold">Shop Collection</h1>
-              <p className="text-sm text-muted-foreground hidden md:block">
+      <div className="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-neutral-200 dark:border-zinc-800/50 sticky top-16 z-30 shadow-sm">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="text-center md:text-left">
+              <h1 className="text-3xl font-black mb-1">Shop Collection</h1>
+              <p className="text-sm text-neutral-500 font-medium hidden md:block">
                 Discover our premium selection of products.
               </p>
             </div>
             
-            <div className="flex gap-2 w-full md:w-auto flex-wrap">
+            <div className="flex gap-3 w-full md:w-auto flex-wrap justify-center">
               <div className="relative flex-1 md:w-80 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
                 <Input
                   placeholder={t('search') || 'Search products...'}
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                  className="pl-10 bg-gray-50 dark:bg-gray-900 border-none focus:ring-1 focus:ring-primary"
+                  className="h-12 pl-12 bg-neutral-100 dark:bg-zinc-900 border-transparent focus:bg-white dark:focus:bg-zinc-950 focus:border-primary focus:ring-1 focus:ring-primary rounded-full transition-all"
                 />
               </div>
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2 min-w-[140px]">
+                  <Button variant="outline" className="h-12 rounded-full border-neutral-200 dark:border-zinc-800 bg-transparent hover:bg-neutral-100 dark:hover:bg-zinc-900/50 font-bold gap-2 min-w-[150px]">
                     <SlidersHorizontal className="h-4 w-4" />
                     {selectedCategory 
                       ? categories.find(c => c.name === selectedCategory)?.name || 'Category'
@@ -117,8 +116,8 @@ const ProductList = () => {
                     }
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 max-h-[300px] overflow-y-auto">
-                  <DropdownMenuItem onClick={() => { 
+                <DropdownMenuContent align="end" className="w-48 bg-white dark:bg-zinc-950 border-neutral-200 dark:border-zinc-800/50 rounded-2xl max-h-[300px] overflow-y-auto">
+                  <DropdownMenuItem className="font-semibold" onClick={() => { 
                     const newParams = new URLSearchParams(searchParams);
                     newParams.delete('category');
                     setSearchParams(newParams);
@@ -130,6 +129,7 @@ const ProductList = () => {
                   {categories.map((cat) => (
                     <DropdownMenuItem 
                       key={cat.id} 
+                      className="font-medium"
                       onClick={() => { 
                         const newParams = new URLSearchParams(searchParams);
                         newParams.set('category', cat.name);
@@ -146,7 +146,7 @@ const ProductList = () => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2 min-w-[140px]">
+                  <Button variant="outline" className="h-12 rounded-full border-neutral-200 dark:border-zinc-800 bg-transparent hover:bg-neutral-100 dark:hover:bg-zinc-900/50 font-bold gap-2 min-w-[150px]">
                     <ArrowUpDown className="h-4 w-4" />
                     {sortBy === 'price' 
                       ? (sortOrder === 'asc' ? 'Price: Low to High' : 'Price: High to Low')
@@ -156,20 +156,20 @@ const ProductList = () => {
                     }
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={() => handleSort('createdAt', 'desc')}>
+                <DropdownMenuContent align="end" className="w-48 bg-white dark:bg-zinc-950 border-neutral-200 dark:border-zinc-800/50 rounded-2xl">
+                  <DropdownMenuItem className="font-semibold" onClick={() => handleSort('createdAt', 'desc')}>
                     Newest Arrivals
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSort('price', 'asc')}>
+                  <DropdownMenuItem className="font-semibold" onClick={() => handleSort('price', 'asc')}>
                     Price: Low to High
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSort('price', 'desc')}>
+                  <DropdownMenuItem className="font-semibold" onClick={() => handleSort('price', 'desc')}>
                     Price: High to Low
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSort('name', 'asc')}>
+                  <DropdownMenuItem className="font-semibold" onClick={() => handleSort('name', 'asc')}>
                     Name: A-Z
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSort('name', 'desc')}>
+                  <DropdownMenuItem className="font-semibold" onClick={() => handleSort('name', 'desc')}>
                     Name: Z-A
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -179,11 +179,11 @@ const ProductList = () => {
         </div>
       </div>
 
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto py-12 px-4 relative z-0">
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-[400px] bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse" />
+              <div key={i} className="h-[400px] bg-neutral-100 dark:bg-zinc-900 rounded-[2rem] animate-pulse" />
             ))}
           </div>
         ) : (
@@ -196,16 +196,16 @@ const ProductList = () => {
         
         {!loading && products.length === 0 && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="h-24 w-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-              <Search className="h-10 w-10 text-gray-400" />
+            <div className="h-24 w-24 bg-neutral-100 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-6 shadow-sm border border-neutral-200 dark:border-zinc-800">
+              <Search className="h-10 w-10 text-neutral-400" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">No products found</h3>
-            <p className="text-muted-foreground max-w-sm mx-auto">
+            <h3 className="text-2xl font-black mb-2">No products found</h3>
+            <p className="text-neutral-500 font-medium max-w-sm mx-auto">
               We couldn't find any products matching your search. Try adjusting your filters or check back later.
             </p>
             <Button 
-              variant="link" 
-              className="mt-4 text-primary"
+              variant="outline" 
+              className="mt-6 rounded-full font-bold h-12 px-8"
               onClick={() => { 
                 setSearch(''); 
                 const newParams = new URLSearchParams(searchParams);
@@ -223,18 +223,18 @@ const ProductList = () => {
 
         {/* Active Filters */}
         {(search || selectedCategory) && (
-          <div className="flex flex-wrap gap-2 mb-6 items-center">
-            <span className="text-sm text-muted-foreground">Active filters:</span>
+          <div className="flex flex-wrap gap-3 mt-10 mb-6 items-center">
+            <span className="text-xs font-black tracking-widest uppercase text-neutral-500">Active filters:</span>
             {search && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+              <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-full text-xs font-bold uppercase tracking-wider">
                 Search: "{search}"
-                <button onClick={() => { setSearch(''); setPage(1); }}>
-                  <X className="h-3 w-3" />
+                <button onClick={() => { setSearch(''); setPage(1); }} className="hover:bg-primary/20 rounded-full p-0.5 transition-colors">
+                  <X className="h-4 w-4" />
                 </button>
               </div>
             )}
             {selectedCategory && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+              <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-full text-xs font-bold uppercase tracking-wider">
                 Category: {selectedCategory}
                 <button onClick={() => { 
                   const newParams = new URLSearchParams(searchParams);
@@ -242,8 +242,8 @@ const ProductList = () => {
                   setSearchParams(newParams);
                   setSelectedCategory('');
                   setPage(1); 
-                }}>
-                  <X className="h-3 w-3" />
+                }} className="hover:bg-primary/20 rounded-full p-0.5 transition-colors">
+                  <X className="h-4 w-4" />
                 </button>
               </div>
             )}
@@ -252,19 +252,21 @@ const ProductList = () => {
 
         {/* Pagination */}
         {!loading && total > limit && (
-          <div className="flex justify-center items-center gap-4 mt-8">
+          <div className="flex justify-center items-center gap-6 mt-16 pb-8">
             <Button 
               variant="outline" 
+              className="h-12 px-8 rounded-full font-bold border-neutral-200 dark:border-zinc-800 bg-transparent hover:bg-neutral-100 dark:hover:bg-zinc-900/50"
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
             >
               Previous
             </Button>
-            <span className="text-sm text-muted-foreground">
-              Page {page} of {Math.ceil(total / limit)}
+            <span className="text-sm font-black text-neutral-500 uppercase tracking-widest">
+              Page {page} / {Math.ceil(total / limit)}
             </span>
             <Button 
               variant="outline" 
+              className="h-12 px-8 rounded-full font-bold border-neutral-200 dark:border-zinc-800 bg-transparent hover:bg-neutral-100 dark:hover:bg-zinc-900/50"
               disabled={page >= Math.ceil(total / limit)}
               onClick={() => setPage(page + 1)}
             >

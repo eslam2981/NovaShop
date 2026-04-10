@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllUsers, getUserById, updateUser, deleteUser } from '../controllers/user.controller';
+import { createUser, getAllUsers, getUserById, updateUser, deleteUser } from '../controllers/user.controller';
 import { protect, restrictTo } from '../middlewares/auth.middleware';
 
 const router = express.Router();
@@ -8,6 +8,7 @@ const router = express.Router();
 router.use(protect);
 router.use(restrictTo('ADMIN'));
 
+router.post('/', createUser);
 router.get('/', getAllUsers);
 router.get('/:id', getUserById);
 router.patch('/:id', updateUser);

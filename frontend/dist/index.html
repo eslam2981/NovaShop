@@ -2,11 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AntGravity</title>
-    <script type="module" crossorigin src="/assets/index-m6gxstbE.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index--Q8jyJbB.css">
+    <meta name="color-scheme" content="light dark" />
+    <title>NovaShop</title>
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem('nova-theme');
+          if (!raw) return;
+          var parsed = JSON.parse(raw);
+          var pref = parsed && parsed.state && parsed.state.preference;
+          if (pref !== 'light' && pref !== 'dark' && pref !== 'system') return;
+          var dark =
+            pref === 'dark' ||
+            (pref === 'system' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-CnK-ECWJ.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-qg0NSMbc.css">
   </head>
   <body>
     <div id="root"></div>

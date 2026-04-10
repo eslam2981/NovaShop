@@ -74,41 +74,41 @@ const AdminCategories = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500 w-full min-w-0">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Categories</h1>
-          <p className="text-muted-foreground">Manage product categories.</p>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight font-sans">Categories</h1>
+          <p className="text-neutral-500 font-medium">Manage product categories.</p>
         </div>
         <Button 
           onClick={() => { setEditingCategory(null); reset(); setShowModal(true); }}
-          className="gap-2 shadow-lg shadow-primary/25"
+          className="gap-2 shadow-lg shadow-primary/25 rounded-full px-6 h-12"
         >
-          <Plus className="h-4 w-4" /> Add Category
+          <Plus className="h-5 w-5" /> Add Category
         </Button>
       </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-6">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800 rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl">
+            <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold">{editingCategory ? 'Edit Category' : 'Add Category'}</h2>
-              <Button variant="ghost" size="icon" onClick={() => { setShowModal(false); reset(); setEditingCategory(null); }}>
-                <X className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-neutral-100 dark:hover:bg-zinc-900" onClick={() => { setShowModal(false); reset(); setEditingCategory(null); }}>
+                <X className="h-5 w-5" />
               </Button>
             </div>
             
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium mb-2">Name</label>
-                <Input {...register('name')} />
+                <label className="block text-sm font-semibold mb-2">Name</label>
+                <Input {...register('name')} className="rounded-xl border-neutral-200 dark:border-zinc-800 bg-neutral-50 dark:bg-zinc-900 h-11" />
                 {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>}
               </div>
               
-              <div className="flex gap-4 pt-4">
-                <Button type="submit" className="flex-1">{editingCategory ? 'Update' : 'Create'}</Button>
-                <Button type="button" variant="outline" onClick={() => { setShowModal(false); reset(); setEditingCategory(null); }}>
+              <div className="flex gap-4 pt-6">
+                <Button type="submit" className="flex-1 rounded-full h-12 text-md font-bold">{editingCategory ? 'Update Category' : 'Create Category'}</Button>
+                <Button type="button" variant="outline" className="rounded-full h-12 px-8 font-bold hover:bg-neutral-100 dark:hover:bg-zinc-800" onClick={() => { setShowModal(false); reset(); setEditingCategory(null); }}>
                   Cancel
                 </Button>
               </div>
@@ -117,25 +117,38 @@ const AdminCategories = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
         {loading ? (
-          <div className="col-span-full text-center py-8 text-gray-500">Loading categories...</div>
+          <div className="col-span-full flex justify-center items-center py-20 text-neutral-500 font-bold">Loading categories...</div>
         ) : categories.length === 0 ? (
-          <div className="col-span-full text-center py-8 text-gray-500">No categories found</div>
+          <div className="col-span-full flex flex-col items-center justify-center py-20 text-center mx-auto text-neutral-500">
+            <p className="font-semibold text-xl text-black dark:text-white mb-2">No categories found</p>
+            <p className="text-sm">Create your first category to start organizing products.</p>
+          </div>
         ) : categories.map((category) => (
-          <div key={category.id} className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white">{category.name}</h3>
-                <p className="text-sm text-gray-500 mt-1">{category.productCount || 0} products</p>
+          <div key={category.id} className="group bg-white dark:bg-zinc-950 p-6 md:p-8 rounded-[2rem] border border-neutral-200 dark:border-zinc-800/50 shadow-sm transition-all hover:shadow-md hover:border-primary/30 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none">
+              <div className="w-24 h-24 rounded-full bg-primary blur-2xl" />
+            </div>
+            <div className="flex flex-col h-full relative z-10">
+              <div className="flex justify-between items-start mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center font-bold text-xl text-primary">
+                  {(typeof category.name === 'object' ? category.name?.name : category.name)?.charAt(0)?.toUpperCase() || 'C'}
+                </div>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:bg-neutral-200 dark:hover:bg-zinc-800" onClick={() => handleEdit(category)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:bg-red-500/10 hover:text-red-500 text-neutral-500" onClick={() => handleDelete(category.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="icon" onClick={() => handleEdit(category)}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(category.id)}>
-                  <Trash2 className="h-4 w-4 text-red-600" />
-                </Button>
+              <div className="mt-auto">
+                <h3 className="font-black text-xl text-black dark:text-white mb-1 truncate">{typeof category.name === 'object' ? category.name.name : category.name}</h3>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-zinc-800 text-xs font-bold text-neutral-500 max-w-fit">
+                  <span className="text-black dark:text-white">{category.productCount || 0}</span> Products
+                </div>
               </div>
             </div>
           </div>

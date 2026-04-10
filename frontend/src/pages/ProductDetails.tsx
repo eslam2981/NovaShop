@@ -3,14 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { productService, Product } from '@/services/product';
 import { Button } from '@/components/ui/button';
 import { useCartStore } from '@/store/cartStore';
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ShoppingCart, ArrowLeft, Star, Truck, ShieldCheck } from 'lucide-react';
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const { addItem } = useCartStore();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);

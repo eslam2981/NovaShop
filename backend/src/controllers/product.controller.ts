@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { createProduct, getProducts, getProductById, updateProduct, deleteProduct } from '../services/product.service';
+import { safeParam } from '../utils/safeParam';
 
 export const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -27,7 +28,7 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
 
 export const getOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const product = await getProductById(req.params.id);
+    const product = await getProductById(safeParam(req.params.id));
     res.status(200).json({
       status: 'success',
       data: { product },
@@ -39,7 +40,7 @@ export const getOne = async (req: Request, res: Response, next: NextFunction) =>
 
 export const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const product = await updateProduct(req.params.id, req.body);
+    const product = await updateProduct(safeParam(req.params.id), req.body);
     res.status(200).json({
       status: 'success',
       data: { product },
@@ -51,7 +52,7 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
 
 export const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await deleteProduct(req.params.id);
+    await deleteProduct(safeParam(req.params.id));
     res.status(204).json({
       status: 'success',
       data: null,

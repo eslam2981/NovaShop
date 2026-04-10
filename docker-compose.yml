@@ -30,13 +30,14 @@ services:
       - '5000:5000'
     environment:
       - PORT=5000
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/antgravity?schema=public
+      - DATABASE_URL=file:/app/data/dev.db
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=supersecretkey
       - JWT_REFRESH_SECRET=superrefreshsecret
       - NODE_ENV=production
+    volumes:
+      - backend_sqlite:/app/data
     depends_on:
-      - postgres
       - redis
     networks:
       - antgravity_network
@@ -57,3 +58,4 @@ networks:
 
 volumes:
   postgres_data:
+  backend_sqlite:

@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import prisma from '../utils/prisma';
 import { AppError } from '../middlewares/error.middleware';
 
@@ -18,7 +19,7 @@ export const createOrder = async (
   const total = Math.max(0, subtotal - discount);
 
   try {
-    return await prisma.$transaction(async (tx) => {
+    return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 1. Check stock for all items
       for (const item of items) {
         const product = await tx.product.findUnique({
@@ -94,7 +95,7 @@ export const createOrder = async (
 export const getOrders = async (userId: string) => {
   const orders = await prisma.order.findMany({
     where: { userId, status: { not: 'PENDING' } },
-    include: { items: { include: { product: true } }, payment: true },
+    include: { items: { include: { product: { include: { images: true } } } }, payment: true },
     orderBy: { createdAt: 'desc' },
   });
   return orders;
@@ -103,7 +104,7 @@ export const getOrders = async (userId: string) => {
 export const getOrderById = async (userId: string, orderId: string) => {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { items: { include: { product: true } }, payment: true },
+    include: { items: { include: { product: { include: { images: true } } } }, payment: true },
   });
 
   if (!order || order.userId !== userId) {

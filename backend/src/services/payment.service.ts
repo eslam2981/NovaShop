@@ -3,9 +3,20 @@ import { env } from '../config/env';
 import prisma from '../utils/prisma';
 import { AppError } from '../middlewares/error.middleware';
 
-const stripe = new Stripe(env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-11-17.clover' as any, // Force type if needed, or just use the string
-});
+let stripeClient: Stripe | null = null;
+
+function getStripe(): Stripe {
+  const key = env.STRIPE_SECRET_KEY?.trim();
+  if (!key) {
+    throw new AppError('Stripe is not configured (set STRIPE_SECRET_KEY)', 503);
+  }
+  if (!stripeClient) {
+    stripeClient = new Stripe(key, {
+      apiVersion: '2025-11-17.clover' as Stripe.LatestApiVersion,
+    });
+  }
+  return stripeClient;
+}
 
 export const createPaymentIntent = async (userId: string) => {
   const cart = await prisma.order.findFirst({
@@ -19,6 +30,7 @@ export const createPaymentIntent = async (userId: string) => {
 
   const amount = Math.round(Number(cart.total) * 100); // Stripe expects cents
 
+  const stripe = getStripe();
   const paymentIntent = await stripe.paymentIntents.create({
     amount,
     currency: 'usd',
@@ -36,6 +48,7 @@ export const createPaymentIntent = async (userId: string) => {
 };
 
 export const handleWebhook = async (signature: string, payload: Buffer) => {
+  const stripe = getStripe();
   let event: Stripe.Event;
 
   try {

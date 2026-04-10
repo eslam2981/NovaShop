@@ -23,8 +23,8 @@ const Home = () => {
         setLoading(true);
         const data = await productService.getAll({ 
           limit: 8,
-          sortBy: 'createdAt',
-          sortOrder: 'desc'
+          sortBy: 'stock',
+          sortOrder: 'asc'
         });
         setProducts(data.products);
       } catch (error) {
@@ -38,16 +38,13 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white dark:bg-zinc-950">
       <Hero />
       <Features />
       <Categories />
       
       {/* Trending Products */}
-      <section className="py-24 bg-gray-50/50 dark:bg-gray-900/50 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+      <section className="py-32 relative overflow-hidden bg-white dark:bg-zinc-950 border-t border-neutral-200 dark:border-zinc-800/50">
         
         <div className="container mx-auto px-4 relative z-10">
           <motion.div 
@@ -64,20 +61,20 @@ const Home = () => {
               viewport={{ once: true }}
             >
               <Sparkles className="h-4 w-4" />
-              <span>New Arrivals</span>
+              <span>Hot Deals & Popular</span>
             </motion.div>
             
             <motion.h2 
-              className="text-3xl md:text-4xl font-bold mb-4"
+              className="text-4xl md:text-5xl lg:text-7xl font-black mb-6 tracking-tighter text-black dark:text-white"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              Trending Now
+              Trending <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">Now</span>
             </motion.h2>
             <motion.p 
-              className="text-muted-foreground text-lg max-w-2xl mx-auto"
+              className="text-neutral-500 text-lg max-w-2xl mx-auto font-medium"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -88,11 +85,14 @@ const Home = () => {
           </motion.div>
           
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <div 
+              className="grid gap-6 md:gap-8 justify-center" 
+              style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))' }}
+            >
               {[...Array(8)].map((_, i) => (
                 <motion.div 
                   key={i} 
-                  className="h-[400px] bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"
+                  className="h-[400px] w-full bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3, delay: i * 0.05 }}
@@ -102,36 +102,40 @@ const Home = () => {
           ) : (
             <>
               <motion.div 
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mb-12"
+                className="grid gap-6 md:gap-8 mb-12 justify-center"
+                style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))' }}
                 variants={staggerContainer}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-100px" }}
               >
                 {products.map((product, index) => (
-                  <ProductCard key={product.id} product={product} index={index} />
+                  <div key={product.id} className="w-full">
+                    <ProductCard product={product} index={index} />
+                  </div>
                 ))}
               </motion.div>
               
               {products.length > 0 && (
                 <motion.div 
-                  className="text-center"
+                  className="text-center mt-12"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.4 }}
                 >
                   <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     <Button 
                       onClick={() => navigate('/products')}
+                      variant="outline"
                       size="lg"
-                      className="h-12 px-8 text-lg rounded-full shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
+                      className="h-16 px-12 text-lg rounded-full border-2 border-neutral-200 dark:border-zinc-800 bg-transparent hover:bg-neutral-100 dark:hover:bg-zinc-900 shadow-sm transition-all font-black tracking-widest uppercase text-black dark:text-white"
                     >
-                      View All Products
-                      <ArrowRight className="ml-2 h-5 w-5" />
+                      Explore All Pieces
+                      <ArrowRight className="ml-3 h-5 w-5" />
                     </Button>
                   </motion.div>
                 </motion.div>

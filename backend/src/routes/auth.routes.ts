@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, logout } from '../controllers/auth.controller';
+import { register, login, logout, googleLogin } from '../controllers/auth.controller';
 import { z } from 'zod';
 
 const router = express.Router();
@@ -22,15 +22,20 @@ const validate = (schema: z.ZodSchema) => (req: express.Request, res: express.Re
     next();
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ status: 'fail', errors: (error as z.ZodError).errors });
+      res.status(400).json({ status: 'fail', errors: (error as z.ZodError).issues });
     } else {
       next(error);
     }
   }
 };
 
+const googleSchema = z.object({
+  credential: z.string(),
+});
+
 router.post('/register', validate(registerSchema), register);
 router.post('/login', validate(loginSchema), login);
+router.post('/google', validate(googleSchema), googleLogin);
 router.post('/logout', logout);
 
 export default router;

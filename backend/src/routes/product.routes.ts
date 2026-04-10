@@ -10,8 +10,10 @@ const productSchema = z.object({
   description: z.string(),
   price: z.number().positive(),
   stock: z.number().int().nonnegative(),
-  categoryId: z.string().uuid(),
+  categoryId: z.string().min(1),
   images: z.array(z.string().url()).optional(),
+  salePrice: z.number().nullable().optional(),
+  saleEndDate: z.string().nullable().optional(),
 });
 
 const updateProductSchema = z.object({
@@ -19,8 +21,10 @@ const updateProductSchema = z.object({
   description: z.string().optional(),
   price: z.number().positive().optional(),
   stock: z.number().int().nonnegative().optional(),
-  categoryId: z.string().uuid().optional(),
+  categoryId: z.string().min(1).optional(),
   images: z.array(z.string().url()).optional(),
+  salePrice: z.number().nullable().optional(),
+  saleEndDate: z.string().nullable().optional(),
 });
 
 const validate = (schema: z.ZodSchema) => (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -29,7 +33,7 @@ const validate = (schema: z.ZodSchema) => (req: express.Request, res: express.Re
     next();
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ status: 'fail', errors: (error as z.ZodError).errors });
+      res.status(400).json({ status: 'fail', errors: (error as z.ZodError).issues });
     } else {
       next(error);
     }

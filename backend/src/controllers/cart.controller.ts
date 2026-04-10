@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { addToCart, getCart, removeFromCart } from '../services/cart.service';
+import { safeParam } from '../utils/safeParam';
 
 const getUserId = (req: Request) => {
   const user = (req as any).user;
@@ -33,7 +34,7 @@ export const getCartItems = async (req: Request, res: Response, next: NextFuncti
 export const removeItem = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = getUserId(req);
-    const cart = await removeFromCart(userId, req.params.itemId);
+    const cart = await removeFromCart(userId, safeParam(req.params.itemId));
     res.status(200).json({ status: 'success', data: { cart } });
   } catch (error) {
     next(error);

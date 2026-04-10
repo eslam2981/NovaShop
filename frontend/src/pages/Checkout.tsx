@@ -37,7 +37,7 @@ const paymentMethods = [
   },
 ];
 
-const CheckoutForm = ({ clientSecret }: { clientSecret: string }) => {
+const CheckoutForm = () => {
   const stripe = useStripe();
   const elements = useElements();
   const [message, setMessage] = useState<string | null>(null);
@@ -94,7 +94,7 @@ const CheckoutForm = ({ clientSecret }: { clientSecret: string }) => {
 const Checkout = () => {
   const { items, total, clearCart } = useCartStore();
   const [clientSecret, setClientSecret] = useState('');
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('card');
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('cash');
   const [showOrderSummary, setShowOrderSummary] = useState(false);
   const [billingInfo, setBillingInfo] = useState({
     fullName: '',
@@ -108,8 +108,9 @@ const Checkout = () => {
 
   useEffect(() => {
     if (items.length > 0 && selectedMethod === 'card') {
-      api.post('/orders/create-payment-intent', { items })
-        .then((res) => setClientSecret(res.data.clientSecret))
+      api
+        .post('/payments/create-intent', {})
+        .then((res) => setClientSecret(res.data.data?.clientSecret ?? ''))
         .catch((err) => console.error(err));
     }
   }, [items, selectedMethod]);
@@ -324,7 +325,7 @@ const Checkout = () => {
 
               {/* Payment Form */}
               <AnimatePresence mode="wait">
-                {selectedMethod === 'card' && clientSecret && (
+                {selectedMethod === 'card' && (
                   <motion.div
                     key="card-payment"
                     initial={{ opacity: 0, height: 0 }}
@@ -332,10 +333,16 @@ const Checkout = () => {
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <h2 className="text-xl font-bold mb-4">Card Details</h2>
-                    <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
-                      <CheckoutForm clientSecret={clientSecret} />
-                    </Elements>
+                    <div className="text-center p-8 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                      <CreditCard className="h-16 w-16 mx-auto mb-4 text-primary" />
+                      <h3 className="text-lg font-semibold mb-2">Secure Card Payment</h3>
+                      <p className="text-sm text-muted-foreground mb-6">
+                        Credit / Debit card payment will be available soon
+                      </p>
+                      <Button className="w-full" disabled>
+                        Pay with Card (Coming Soon)
+                      </Button>
+                    </div>
                   </motion.div>
                 )}
 

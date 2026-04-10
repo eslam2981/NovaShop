@@ -16,6 +16,16 @@ export const userService = {
     return response.data.data.users;
   },
 
+  create: async (data: {
+    name: string;
+    email: string;
+    password: string;
+    role: 'USER' | 'ADMIN';
+  }): Promise<User> => {
+    const response = await api.post('/users', data);
+    return response.data.data.user;
+  },
+
   getById: async (id: string): Promise<User> => {
     const response = await api.get(`/users/${id}`);
     return response.data.data.user;

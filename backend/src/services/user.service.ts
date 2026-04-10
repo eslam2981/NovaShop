@@ -57,6 +57,40 @@ export const getUserById = async (id: string) => {
   return user;
 };
 
+const ALLOWED_ROLES = ['USER', 'ADMIN'] as const;
+
+export const createUser = async (data: {
+  name: string;
+  email: string;
+  password: string;
+  role?: string;
+}) => {
+  const existing = await prisma.user.findUnique({ where: { email: data.email } });
+  if (existing) {
+    throw new AppError('Email already in use', 400);
+  }
+
+  const role = data.role === 'ADMIN' ? 'ADMIN' : 'USER';
+  const hashedPassword = await bcrypt.hash(data.password, 12);
+
+  return prisma.user.create({
+    data: {
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
+      role,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+};
+
 export const updateUser = async (id: string, data: { name?: string; email?: string; role?: string; password?: string }) => {
   const user = await prisma.user.findUnique({ where: { id } });
 
@@ -74,7 +108,12 @@ export const updateUser = async (id: string, data: { name?: string; email?: stri
     }
     updateData.email = data.email;
   }
-  if (data.role) updateData.role = data.role;
+  if (data.role !== undefined) {
+    if (!ALLOWED_ROLES.includes(data.role as (typeof ALLOWED_ROLES)[number])) {
+      throw new AppError('Invalid role', 400);
+    }
+    updateData.role = data.role;
+  }
   if (data.password) {
     updateData.password = await bcrypt.hash(data.password, 12);
   }

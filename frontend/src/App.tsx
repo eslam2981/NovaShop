@@ -137,6 +137,14 @@ function AnimatedRoutes() {
 }
 
 import ScrollToTop from './components/ScrollToTop';
+import { ThemeSync } from './components/ThemeSync';
+import { useThemeStore, resolveDark } from './store/themeStore';
+
+function ThemedToaster() {
+  const preference = useThemeStore((s) => s.preference);
+  const dark = resolveDark(preference);
+  return <Toaster position="top-center" richColors theme={dark ? 'dark' : 'light'} />;
+}
 
 function App() {
   const { i18n } = useTranslation();
@@ -148,10 +156,11 @@ function App() {
 
   return (
     <Router>
+      <ThemeSync />
       <ScrollToTop />
-      <div className="min-h-screen bg-background text-foreground font-sans antialiased">
+      <div className="min-h-screen bg-background text-foreground font-sans antialiased transition-colors duration-300">
         <AnimatedRoutes />
-        <Toaster position="top-center" richColors />
+        <ThemedToaster />
       </div>
     </Router>
   );
