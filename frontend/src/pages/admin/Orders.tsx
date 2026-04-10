@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '@/services/api';
+import { useAuthStore } from '@/store/authStore';
 
 import {
   Select,
@@ -9,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { format } from 'date-fns';
-import { Loader2, MapPin, CreditCard } from 'lucide-react';
+import { Loader2, MapPin, CreditCard, Trash2 } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -25,7 +26,17 @@ interface Order {
   items: any[];
 }
 
+const parseAddress = (addressStr: string) => {
+  try {
+    const parsed = JSON.parse(addressStr);
+    return `${parsed.address || ''}, ${parsed.city || ''}, ${parsed.country || ''}`.replace(/(^,\s*)|(,\s*$)/g, '').replace(/,\s*,/g, ',');
+  } catch {
+    return addressStr;
+  }
+};
+
 const AdminOrders = () => {
+  const currentUser = useAuthStore((s) => s.user);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,6 +61,18 @@ const AdminOrders = () => {
       fetchOrders();
     } catch (error) {
       console.error('Failed to update status', error);
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!window.confirm('Are you sure you want to completely delete this order? This will safely restore the products stock and remove it from the system entirely.')) return;
+    try {
+      await api.delete(`/orders/admin/${orderId}`);
+      // Optimistically remove or re-fetch
+      setOrders(orders.filter(o => o.id !== orderId));
+    } catch (error) {
+      console.error('Failed to delete order', error);
+      alert('Failed to delete order. Please try again.');
     }
   };
 
@@ -91,11 +114,12 @@ const AdminOrders = () => {
                 <th className="px-6 py-5 font-bold tracking-wider">Payment</th>
                 <th className="px-6 py-5 font-bold tracking-wider">Shipping</th>
                 <th className="px-8 py-5 font-bold tracking-wider">Status</th>
+                <th className="px-6 py-5 font-bold tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100 dark:divide-zinc-800/50">
               {orders.length === 0 ? (
-                <tr><td colSpan={7} className="p-12 text-center text-neutral-500 font-medium">No orders found.</td></tr>
+                <tr><td colSpan={8} className="p-12 text-center text-neutral-500 font-medium">No orders found.</td></tr>
               ) : orders.map((order) => {
                 const userName = typeof order.user === 'object' ? order.user?.name : order.user;
                 const userEmail = typeof order.user === 'object' ? order.user?.email : 'N/A';
@@ -103,7 +127,7 @@ const AdminOrders = () => {
                 <tr key={order.id} className="hover:bg-neutral-50/50 dark:hover:bg-zinc-900/50 transition-colors group">
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-2">
-                       <span className="font-bold text-primary">#{order.id.slice(-6).toUpperCase()}</span>
+                       <span className="font-bold text-primary">#{String(order.id).slice(-6).toUpperCase()}</span>
                     </div>
                   </td>
                   <td className="px-6 py-5">
@@ -146,6 +170,17 @@ const AdminOrders = () => {
                         <SelectItem value="CANCELLED" className="font-bold hover:bg-neutral-100">CANCELLED</SelectItem>
                       </SelectContent>
                     </Select>
+                  </td>
+                  <td className="px-6 py-5 text-right">
+                    {currentUser?.role === 'OWNER' && (
+                      <button
+                        onClick={() => handleDeleteOrder(order.id)}
+                        className="p-2 text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all"
+                        title="Permanently Delete Order"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    )}
                   </td>
                 </tr>
                 )

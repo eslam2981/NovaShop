@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react';
 const categories = [
   {
     id: 'electronics',
-    name: 'Tech & Audio',
+    name: 'Electronics',
     queryName: 'Electronics',
     image: 'https://images.unsplash.com/photo-1491933382434-500287f9b54b?auto=format&fit=crop&q=80&w=1200',
     description: 'Immersive sound and cutting-edge devices.',
@@ -13,7 +13,7 @@ const categories = [
   },
   {
     id: 'fashion',
-    name: 'Apparel',
+    name: 'Clothing',
     queryName: 'Clothing',
     image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=800',
     description: 'Curated fashion pieces.',
@@ -21,7 +21,7 @@ const categories = [
   },
   {
     id: 'home',
-    name: 'Living',
+    name: 'Home',
     queryName: 'Home',
     image: 'https://images.unsplash.com/photo-1593696140826-c58b021acf8b?auto=format&fit=crop&q=80&w=800',
     description: 'Minimalist interior objects.',
@@ -29,7 +29,7 @@ const categories = [
   },
   {
     id: 'sports',
-    name: 'Active',
+    name: 'Sports',
     queryName: 'Sports',
     image: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&q=80&w=800',
     description: 'High-performance gear.',
@@ -50,7 +50,7 @@ const Categories = () => {
         >
           <div className="flex flex-col items-center md:items-start">
             <h2 className="text-4xl md:text-5xl lg:text-7xl font-black mb-4 tracking-tighter text-black dark:text-white">Collections.</h2>
-            <p className="text-xl text-neutral-500 max-w-md font-medium">Discover categories crafted carefully for modern lifestyles.</p>
+            <p className="text-xl text-neutral-500 max-w-md font-medium">Discover categories crafted carefully for mode</p>
           </div>
           <Link to="/products" className="hidden md:inline-flex items-center gap-2 font-black uppercase tracking-widest text-sm text-neutral-500 hover:text-black dark:hover:text-white transition-colors">
             View All <ArrowRight className="w-4 h-4" />

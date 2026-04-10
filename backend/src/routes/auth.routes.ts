@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, logout, googleLogin } from '../controllers/auth.controller';
+import { register, login, logout, googleLogin, forgotPassword, verifyResetCode, resetPassword } from '../controllers/auth.controller';
 import { z } from 'zod';
 
 const router = express.Router();
@@ -37,5 +37,9 @@ router.post('/register', validate(registerSchema), register);
 router.post('/login', validate(loginSchema), login);
 router.post('/google', validate(googleSchema), googleLogin);
 router.post('/logout', logout);
+
+router.post('/forgot-password', forgotPassword);
+router.post('/verify-reset-code', verifyResetCode);
+router.post('/reset-password', resetPassword);
 
 export default router;

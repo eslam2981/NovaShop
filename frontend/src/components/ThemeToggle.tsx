@@ -46,7 +46,7 @@ export function ThemeToggle({ variant = 'icon' }: Props) {
             <DropdownMenuItem
               key={value}
               onClick={() => setPreference(value)}
-              className={preference === value ? 'bg-accent' : ''}
+              className={preference === value ? 'bg-neutral-100 dark:bg-zinc-900/50 text-foreground font-bold' : ''}
             >
               <Icon className="mr-2 h-4 w-4" />
               {label}

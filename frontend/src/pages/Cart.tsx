@@ -24,9 +24,13 @@ const CartPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900 py-12 px-4">
-      <div className="container mx-auto max-w-6xl">
-        <h1 className="text-3xl font-bold mb-8">Shopping Cart ({items.length})</h1>
+    <div className="min-h-[calc(100vh-80px)] bg-neutral-50/50 dark:bg-zinc-950/50 py-12 px-4 relative overflow-hidden">
+      {/* Background blobs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+
+      <div className="container mx-auto max-w-6xl relative z-10">
+        <h1 className="text-4xl md:text-5xl font-black mb-10 tracking-tighter text-black dark:text-white">Shopping Cart ({items.length})</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
@@ -39,9 +43,9 @@ const CartPage = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
-                  className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4 items-center"
+                  className="bg-white dark:bg-zinc-950 p-6 rounded-[2rem] shadow-xl shadow-black/5 dark:shadow-none border border-neutral-200 dark:border-zinc-800/50 flex flex-col sm:flex-row gap-6 items-center hover:border-primary/50 transition-colors"
                 >
-                  <div className="h-24 w-24 bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden flex-shrink-0">
+                  <div className="h-32 w-32 sm:h-24 sm:w-24 bg-neutral-100 dark:bg-zinc-900 rounded-2xl overflow-hidden flex-shrink-0">
                     {item.image ? (
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                     ) : (
@@ -49,22 +53,22 @@ const CartPage = () => {
                     )}
                   </div>
                   
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg mb-1">{item.name}</h3>
-                    <p className="text-primary font-bold">${item.price.toFixed(2)}</p>
+                  <div className="flex-1 text-center sm:text-left">
+                    <h3 className="font-bold text-xl mb-2 text-black dark:text-white">{item.name}</h3>
+                    <p className="text-primary font-black text-lg">${item.price.toFixed(2)}</p>
                   </div>
 
-                  <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900 rounded-lg p-1">
+                  <div className="flex items-center gap-4 bg-neutral-50 dark:bg-zinc-900/50 rounded-2xl p-2 border border-neutral-100 dark:border-zinc-800/50">
                     <button 
                       onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                      className="p-1 hover:bg-white dark:hover:bg-gray-800 rounded-md transition-colors"
+                      className="p-2 hover:bg-white dark:hover:bg-zinc-800 rounded-xl transition-colors text-black dark:text-white"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
-                    <span className="font-medium w-4 text-center">{item.quantity}</span>
+                    <span className="font-bold w-6 text-center text-black dark:text-white">{item.quantity}</span>
                     <button 
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="p-1 hover:bg-white dark:hover:bg-gray-800 rounded-md transition-colors"
+                      className="p-2 hover:bg-white dark:hover:bg-zinc-800 rounded-xl transition-colors text-black dark:text-white"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
@@ -73,7 +77,7 @@ const CartPage = () => {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl h-12 w-12 shrink-0 mb-4 sm:mb-0"
                     onClick={() => removeItem(item.id)}
                   >
                     <Trash2 className="h-5 w-5" />
@@ -85,26 +89,26 @@ const CartPage = () => {
 
           {/* Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 sticky top-24">
-              <h2 className="text-xl font-bold mb-6">Order Summary</h2>
+            <div className="bg-white dark:bg-zinc-950 p-8 rounded-[2rem] shadow-xl shadow-black/5 dark:shadow-none border border-neutral-200 dark:border-zinc-800/50 sticky top-24">
+              <h2 className="text-2xl font-black mb-8 tracking-tighter text-black dark:text-white">Order Summary</h2>
               
-              <div className="space-y-4 mb-6">
-                <div className="flex justify-between text-gray-600 dark:text-gray-400">
+              <div className="space-y-4 mb-8">
+                <div className="flex justify-between font-bold text-neutral-500">
                   <span>Subtotal</span>
-                  <span>${total().toFixed(2)}</span>
+                  <span className="text-black dark:text-white">${total().toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                <div className="flex justify-between font-bold text-neutral-500">
                   <span>Shipping</span>
-                  <span className="text-green-600">Free</span>
+                  <span className="text-emerald-500">Free</span>
                 </div>
-                <div className="border-t border-gray-100 dark:border-gray-700 pt-4 flex justify-between font-bold text-lg">
-                  <span>Total</span>
-                  <span>${total().toFixed(2)}</span>
+                <div className="border-t border-neutral-100 dark:border-zinc-800/50 pt-6 mt-6 flex justify-between items-center">
+                  <span className="font-black text-xl text-black dark:text-white uppercase tracking-tighter">Total</span>
+                  <span className="font-black text-3xl text-primary">${total().toFixed(2)}</span>
                 </div>
               </div>
 
               <Button 
-                className="w-full h-12 text-lg rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all"
+                className="w-full h-14 text-lg rounded-xl font-bold bg-black dark:bg-white text-white dark:text-black hover:scale-[1.02] transition-transform shadow-xl shadow-primary/20"
                 onClick={() => navigate('/checkout')}
               >
                 Checkout <ArrowRight className="ml-2 h-5 w-5" />

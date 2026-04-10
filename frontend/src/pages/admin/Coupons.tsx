@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { couponService, Coupon } from '@/services/coupon';
+import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Trash2, Power, Tag, Percent } from 'lucide-react';
+import { Plus, Trash2, Power, Tag } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -17,7 +18,8 @@ const AdminCoupons = () => {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  
+  const currentUser = useAuthStore((s) => s.user);
+
   // Form state
   const [formData, setFormData] = useState({
     code: '',
@@ -262,14 +264,16 @@ const AdminCoupons = () => {
                         >
                           <Power className="h-4 w-4" />
                         </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="rounded-xl text-red-500 hover:text-red-500 hover:bg-red-500/10"
-                          onClick={() => handleDelete(coupon.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {currentUser?.role === 'OWNER' && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="rounded-xl text-red-500 hover:text-red-500 hover:bg-red-500/10"
+                            onClick={() => handleDelete(coupon.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>

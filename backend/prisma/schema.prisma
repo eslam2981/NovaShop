@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -14,9 +14,11 @@ model User {
   name         String
   authProvider String   @default("LOCAL")
   googleId     String?  @unique
-  role         String   @default("USER")
-  createdAt    DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role             String   @default("USER")
+  resetCode        String?
+  resetCodeExpiry  DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
   orders    Order[]
   wishlist  Wishlist?
   reviews   Review[]

@@ -9,7 +9,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from '@/components/layouts/AuthLayout';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuthStore } from '@/store/authStore';
-import { useThemeStore, resolveDark } from '@/store/themeStore';
+
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -20,8 +20,7 @@ const registerSchema = z.object({
 type RegisterForm = z.infer<typeof registerSchema>;
 
 const Register = () => {
-  const { preference } = useThemeStore();
-  const isDark = resolveDark(preference);
+
   const { login } = useAuthStore();
   const navigate = useNavigate();
   const [error, setError] = useState<string>('');

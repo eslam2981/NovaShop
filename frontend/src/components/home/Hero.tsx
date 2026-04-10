@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useEffect, useRef, useState } from 'react';
+import { productService } from '@/services/product';
 
 const AnimatedNumber = ({ value, suffix = "", decimals = 0, format = false }: { value: number, suffix?: string, decimals?: number, format?: boolean }) => {
   const ref = useRef(null);
@@ -35,6 +36,15 @@ const Hero = () => {
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 800], [0, 300]);
   const opacity = useTransform(scrollY, [0, 400], [1, 0]);
+  const [stats, setStats] = useState({ productsCount: 0, usersCount: 0 });
+
+  useEffect(() => {
+    productService.getPublicStats()
+      .then(data => {
+        setStats(data);
+      })
+      .catch(console.error);
+  }, []);
 
   return (
     <div className="relative min-h-[95vh] w-full overflow-hidden bg-white dark:bg-zinc-950 flex flex-col justify-end pb-12 lg:pb-24">
@@ -102,8 +112,8 @@ const Hero = () => {
           className="hidden lg:flex flex-col gap-8 p-8 md:p-10 rounded-[3rem] bg-white/60 dark:bg-zinc-950/60 backdrop-blur-3xl border border-white/20 dark:border-zinc-800/50 shadow-2xl min-w-[320px]"
         >
           {[
-            { label: 'Curated Products', component: <AnimatedNumber value={2000} suffix="+" format={true} /> },
-            { label: 'Active Members', component: <AnimatedNumber value={50} suffix="k+" /> },
+            { label: 'Curated Products', component: <AnimatedNumber value={stats.productsCount} suffix="+" format={true} /> },
+            { label: 'Active Members', component: <AnimatedNumber value={stats.usersCount} suffix="+" format={true} /> },
             { label: 'Global Satisfaction', component: <AnimatedNumber value={4.9} suffix="/5" decimals={1} /> },
           ].map((stat, index) => (
              <div key={index} className="flex flex-col">

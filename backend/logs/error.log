@@ -333,3 +333,27 @@
 2026-04-10 01:34:23:3423 [31merror[39m: [31mرمز الدخول غير صالح. يرجى تسجيل الدخول مرة أخرى[39m
 2026-04-10 01:34:23:3423 [31merror[39m: [31mرمز الدخول غير صالح. يرجى تسجيل الدخول مرة أخرى[39m
 2026-04-10 01:50:14:5014 [31merror[39m: [31mرمز الدخول غير صالح. يرجى تسجيل الدخول مرة أخرى[39m
+2026-04-10 02:06:20:620 [31merror[39m: [31mرمز الدخول غير صالح. يرجى تسجيل الدخول مرة أخرى[39m
+2026-04-10 02:06:20:620 [31merror[39m: [31mرمز الدخول غير صالح. يرجى تسجيل الدخول مرة أخرى[39m
+2026-04-10 02:12:41:1241 [31merror[39m: [31mInvalid email or password[39m
+2026-04-10 02:12:42:1242 [31merror[39m: [31mInvalid email or password[39m
+2026-04-10 02:13:08:138 [31merror[39m: [31mInvalid email or password[39m
+2026-04-10 02:13:09:139 [31merror[39m: [31mInvalid email or password[39m
+2026-04-10 02:13:09:139 [31merror[39m: [31mInvalid email or password[39m
+2026-04-10 02:13:10:1310 [31merror[39m: [31mInvalid email or password[39m
+2026-04-10 02:14:24:1424 [31merror[39m: [31mInvalid email or password[39m
+2026-04-10 13:42:53:4253 [31merror[39m: [31mOrder not found[39m
+2026-04-10 13:42:53:4253 [31merror[39m: [31mOrder not found[39m
+2026-04-10 14:16:49:1649 [31merror[39m: [31mCannot read properties of undefined (reading 'error')[39m
+2026-04-10 14:18:41:1841 [31merror[39m: [31mInvalid email or password[39m
+2026-04-10 14:18:49:1849 [31merror[39m: [31mInvalid email or password[39m
+2026-04-10 14:22:28:2228 [31merror[39m: [31mThis email is registered via Google. You cannot reset its password here.[39m
+2026-04-10 14:22:54:2254 [31merror[39m: [31mNo user found with this email[39m
+2026-04-10 14:23:22:2322 [31merror[39m: [31mNo user found with this email[39m
+2026-04-10 14:23:30:2330 [31merror[39m: [31mThis email is registered via Google. You cannot reset its password here.[39m
+2026-04-10 14:24:19:2419 [31merror[39m: [31mهذا البريد الإلكتروني مستخدم بالفعل[39m
+2026-04-10 14:25:58:2558 [31merror[39m: [31mThis email is already in use[39m
+2026-04-10 14:30:26:3026 [31merror[39m: [31mAssignment to constant variable.[39m
+2026-04-10 14:34:13:3413 [31merror[39m: [31mOnly the OWNER can change user roles[39m
+2026-04-10 14:34:46:3446 [31merror[39m: [31mOnly the OWNER can change user roles[39m
+2026-04-10 14:35:24:3524 [31merror[39m: [31mOnly the OWNER can change user roles[39m

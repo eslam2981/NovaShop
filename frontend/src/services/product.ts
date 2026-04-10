@@ -62,4 +62,9 @@ export const productService = {
   delete: async (id: string): Promise<void> => {
     await api.delete(`/products/${id}`);
   },
+
+  getPublicStats: async (): Promise<{ productsCount: number, usersCount: number }> => {
+    const response = await api.get('/products/stats/public');
+    return response.data.data;
+  },
 };

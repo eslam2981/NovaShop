@@ -131,7 +131,7 @@ const Navbar = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {user.role === 'ADMIN' && (
+                {(user.role === 'ADMIN' || user.role === 'OWNER') && (
                   <DropdownMenuItem onClick={() => navigate('/admin')}>
                     Admin Dashboard
                   </DropdownMenuItem>
@@ -140,14 +140,11 @@ const Navbar = () => {
                   My Orders
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600" onClick={async () => {
-                  try {
-                    await authService.logout();
-                  } catch (error) {
-                    console.error('Logout error', error);
-                  }
+                <DropdownMenuItem className="text-red-600" onClick={(e) => {
+                  e.preventDefault();
+                  authService.logout().catch(console.error);
+                  navigate('/login', { state: { fromLogout: true }, replace: true });
                   logout();
-                  navigate('/login', { state: { fromLogout: true } });
                 }}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Log out
@@ -282,8 +279,10 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-neutral-200 dark:border-zinc-800/50 pt-10 text-center text-xs font-bold uppercase tracking-widest text-neutral-500">
-          © 2026 NovaShop. Developed by Eslam Gamil.
+        <div className="border-t border-neutral-200 dark:border-zinc-800/50 pt-8 pb-0 mt-8 w-full">
+          <p className="text-center text-sm md:text-base font-semibold text-neutral-500 dark:text-neutral-400">
+            © {new Date().getFullYear()} NovaShop. Developed by <span className="text-black dark:text-white font-black tracking-wide">Eslam Gamil</span>.
+          </p>
         </div>
       </div>
     </footer>

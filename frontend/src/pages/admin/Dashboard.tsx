@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
 import { motion } from 'framer-motion';
 import { DollarSign, ShoppingBag, Users, Package, Clock, TrendingUp } from 'lucide-react';
@@ -235,7 +235,7 @@ const AdminDashboard = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={stats.categoryData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={2} dataKey="value" stroke="none">
-                      {stats.categoryData.map((_entry, index) => (
+                      {stats.categoryData?.map((_entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -297,9 +297,10 @@ const AdminDashboard = () => {
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="font-bold mb-1 text-sm xl:text-base">${Number(order?.totalAmount || 0).toFixed(2)}</p>
+                  <p className="font-bold mb-1 text-sm xl:text-base">${Number(order?.total || order?.totalAmount || 0).toFixed(2)}</p>
                   <span className={`text-[9px] xl:text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 xl:px-2.5 xl:py-1 rounded-full ${
-                    order?.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-500' :
+                    ['COMPLETED', 'DELIVERED'].includes(order?.status) ? 'bg-emerald-500/10 text-emerald-500' :
+                    order?.status === 'SHIPPED' ? 'bg-blue-500/10 text-blue-500' :
                     order?.status === 'PENDING' ? 'bg-orange-500/10 text-orange-500' :
                     order?.status === 'PROCESSING' ? 'bg-blue-500/10 text-blue-500' :
                     'bg-red-500/10 text-red-500'

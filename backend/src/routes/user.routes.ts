@@ -6,7 +6,7 @@ const router = express.Router();
 
 // All routes require admin authentication
 router.use(protect);
-router.use(restrictTo('ADMIN'));
+router.use(restrictTo('ADMIN', 'OWNER'));
 
 router.post('/', createUser);
 router.get('/', getAllUsers);

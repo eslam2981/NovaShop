@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { productService, Product } from '@/services/product';
 import { categoryService, Category } from '@/services/category';
+import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Edit, Trash2, X } from 'lucide-react';
@@ -22,6 +23,7 @@ const productSchema = z.object({
 type ProductForm = z.infer<typeof productSchema>;
 
 const AdminProducts = () => {
+  const currentUser = useAuthStore((s) => s.user);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,7 +77,12 @@ const AdminProducts = () => {
       reset();
       fetchData();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to save product');
+      const data = error.response?.data;
+      if (data?.errors && Array.isArray(data.errors)) {
+        alert('Validation Error:\n' + data.errors.map((e: any) => `- ${e.path.join('.')}: ${e.message}`).join('\n'));
+      } else {
+        alert(data?.message || 'Failed to save product');
+      }
     }
   };
 
@@ -239,7 +246,14 @@ const AdminProducts = () => {
                     <div className="flex items-center gap-4">
                       <div className="h-14 w-14 rounded-2xl bg-neutral-100 dark:bg-zinc-800 flex-shrink-0 overflow-hidden border border-neutral-200 dark:border-zinc-700/50 relative">
                         {product.images && product.images.length > 0 ? (
-                          <img src={product.images[0]} alt="" className="h-full w-full object-cover transition-transform group-hover:scale-110" />
+                          <img 
+                            src={product.images[0]} 
+                            alt="" 
+                            className="h-full w-full object-cover transition-transform group-hover:scale-110" 
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://placehold.co/100x100/f4f4f5/a1a1aa?text=Image+Error';
+                            }}
+                          />
                         ) : (
                           <div className="h-full w-full flex items-center justify-center text-neutral-400 text-[10px] font-bold">NO IMG</div>
                         )}
@@ -264,9 +278,11 @@ const AdminProducts = () => {
                       <Button variant="ghost" size="icon" className="rounded-xl hover:bg-neutral-200 dark:hover:bg-zinc-800" onClick={() => handleEdit(product)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="rounded-xl hover:bg-red-500/10 hover:text-red-500" onClick={() => handleDelete(product.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {currentUser?.role === 'OWNER' && (
+                        <Button variant="ghost" size="icon" className="rounded-xl hover:bg-red-500/10 hover:text-red-500" onClick={() => handleDelete(product.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>

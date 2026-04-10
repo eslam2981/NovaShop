@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { createProduct, getProducts, getProductById, updateProduct, deleteProduct } from '../services/product.service';
+import { createProduct, getProducts, getProductById, updateProduct, deleteProduct, getStoreStats } from '../services/product.service';
 import { safeParam } from '../utils/safeParam';
 
 export const create = async (req: Request, res: Response, next: NextFunction) => {
@@ -56,6 +56,18 @@ export const remove = async (req: Request, res: Response, next: NextFunction) =>
     res.status(204).json({
       status: 'success',
       data: null,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPublicStats = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const stats = await getStoreStats();
+    res.status(200).json({
+      status: 'success',
+      data: stats,
     });
   } catch (error) {
     next(error);

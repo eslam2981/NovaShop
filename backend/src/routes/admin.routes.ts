@@ -6,7 +6,7 @@ const router = Router();
 
 // All admin routes require authentication and admin role
 router.use(protect);
-router.use(restrictTo('ADMIN'));
+router.use(restrictTo('ADMIN', 'OWNER'));
 
 // Admin statistics endpoint
 router.get('/stats', getStats);

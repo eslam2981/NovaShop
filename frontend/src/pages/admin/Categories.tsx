@@ -133,7 +133,7 @@ const AdminCategories = () => {
             <div className="flex flex-col h-full relative z-10">
               <div className="flex justify-between items-start mb-6">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center font-bold text-xl text-primary">
-                  {(typeof category.name === 'object' ? category.name?.name : category.name)?.charAt(0)?.toUpperCase() || 'C'}
+                  {(typeof category.name === 'object' ? (category.name as any)?.name : category.name)?.charAt(0)?.toUpperCase() || 'C'}
                 </div>
                 <div className="flex gap-1">
                   <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:bg-neutral-200 dark:hover:bg-zinc-800" onClick={() => handleEdit(category)}>
@@ -145,7 +145,7 @@ const AdminCategories = () => {
                 </div>
               </div>
               <div className="mt-auto">
-                <h3 className="font-black text-xl text-black dark:text-white mb-1 truncate">{typeof category.name === 'object' ? category.name.name : category.name}</h3>
+                <h3 className="font-black text-xl text-black dark:text-white mb-1 truncate">{typeof category.name === 'object' ? (category.name as any)?.name : category.name}</h3>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-zinc-800 text-xs font-bold text-neutral-500 max-w-fit">
                   <span className="text-black dark:text-white">{category.productCount || 0}</span> Products
                 </div>

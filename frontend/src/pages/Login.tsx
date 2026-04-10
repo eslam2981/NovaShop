@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from '@/components/layouts/AuthLayout';
 import { useGoogleLogin } from '@react-oauth/google';
-import { useThemeStore, resolveDark } from '@/store/themeStore';
+
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -19,8 +19,7 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 const Login = () => {
-  const { preference } = useThemeStore();
-  const isDark = resolveDark(preference);
+
   const { login } = useAuthStore();
   const navigate = useNavigate();
   const [error, setError] = useState<string>('');
@@ -145,7 +144,14 @@ const Login = () => {
             autoComplete="new-password"
             key="login-password"
           />
-          {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
+          <div className="flex justify-between items-center px-2">
+            {errors.password ? (
+              <p className="text-sm text-red-500">{errors.password.message}</p>
+            ) : <div />}
+            <Link to="/forgot-password" className="text-sm font-bold text-primary hover:underline transition-all">
+              Forgot Password?
+            </Link>
+          </div>
         </div>
 
         <Button type="submit" className="w-full h-14 md:h-16 text-base font-black uppercase tracking-widest rounded-full shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all" disabled={isSubmitting}>

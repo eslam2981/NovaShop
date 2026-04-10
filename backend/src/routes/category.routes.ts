@@ -31,9 +31,9 @@ router.get('/', getAllCategories);
 router.get('/:id', getCategoryById);
 
 // Admin routes
-router.post('/', protect, restrictTo('ADMIN'), validate(categorySchema), createCategory);
-router.patch('/:id', protect, restrictTo('ADMIN'), validate(updateCategorySchema), updateCategory);
-router.delete('/:id', protect, restrictTo('ADMIN'), deleteCategory);
+router.post('/', protect, restrictTo('ADMIN', 'OWNER'), validate(categorySchema), createCategory);
+router.patch('/:id', protect, restrictTo('ADMIN', 'OWNER'), validate(updateCategorySchema), updateCategory);
+router.delete('/:id', protect, restrictTo('ADMIN', 'OWNER'), deleteCategory);
 
 export default router;
 

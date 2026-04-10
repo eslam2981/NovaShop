@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { useState } from 'react';
+
 import { useCartStore } from '@/store/cartStore';
 import api from '@/services/api';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import { slideUp, fadeIn } from '@/lib/animations';
 import { couponService } from '@/services/coupon';
 import { toast } from 'sonner';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_mock');
+
 
 type PaymentMethod = 'card' | 'paypal' | 'cash';
 
@@ -37,63 +36,8 @@ const paymentMethods = [
   },
 ];
 
-const CheckoutForm = () => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [message, setMessage] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const navigate = useNavigate();
-  const { clearCart } = useCartStore();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!stripe || !elements) return;
-
-    setIsProcessing(true);
-
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: window.location.origin + '/orders',
-      },
-      redirect: 'if_required',
-    });
-
-    if (error) {
-      setMessage(error.message || 'An unexpected error occurred.');
-    } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-      setMessage('Payment succeeded!');
-      clearCart();
-      navigate('/orders');
-    } else {
-      setMessage('Something went wrong.');
-    }
-
-    setIsProcessing(false);
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement className="mb-6" />
-      <Button 
-        disabled={isProcessing || !stripe || !elements} 
-        className="w-full h-12 text-lg rounded-xl shadow-lg shadow-primary/25"
-      >
-        {isProcessing ? 'Processing...' : (
-          <span className="flex items-center justify-center gap-2">
-            <Lock className="h-4 w-4" /> Pay Now
-          </span>
-        )}
-      </Button>
-      {message && <div className="text-red-500 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">{message}</div>}
-    </form>
-  );
-};
-
 const Checkout = () => {
   const { items, total, clearCart } = useCartStore();
-  const [clientSecret, setClientSecret] = useState('');
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('cash');
   const [showOrderSummary, setShowOrderSummary] = useState(false);
   const [billingInfo, setBillingInfo] = useState({
@@ -105,15 +49,6 @@ const Checkout = () => {
     zipCode: '',
   });
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (items.length > 0 && selectedMethod === 'card') {
-      api
-        .post('/payments/create-intent', {})
-        .then((res) => setClientSecret(res.data.data?.clientSecret ?? ''))
-        .catch((err) => console.error(err));
-    }
-  }, [items, selectedMethod]);
 
   const [couponCode, setCouponCode] = useState('');
   const [discount, setDiscount] = useState(0);
@@ -196,16 +131,20 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900 py-12 px-4">
-      <div className="container mx-auto max-w-4xl">
+    <div className="min-h-[calc(100vh-80px)] bg-neutral-50/50 dark:bg-zinc-950/50 py-12 px-4 relative overflow-hidden">
+      {/* Background blobs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+
+      <div className="container mx-auto max-w-4xl relative z-10">
         <motion.div 
           variants={slideUp}
           initial="hidden"
           animate="visible"
-          className="text-center mb-8"
+          className="text-center mb-10"
         >
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Secure Checkout</h1>
-          <p className="text-muted-foreground">Complete your purchase securely</p>
+          <h1 className="text-4xl md:text-5xl font-black mb-3 tracking-tighter text-black dark:text-white">Secure Checkout</h1>
+          <p className="text-neutral-500 font-medium">Complete your purchase securely</p>
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -216,10 +155,10 @@ const Checkout = () => {
             animate="visible"
             transition={{ delay: 0.1 }}
           >
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="bg-white dark:bg-zinc-950 p-8 rounded-[2rem] shadow-xl shadow-black/5 dark:shadow-none border border-neutral-200 dark:border-zinc-800/50">
               {/* Payment Method Selection */}
-              <div className="mb-8">
-                <h2 className="text-xl font-bold mb-4">Payment Method</h2>
+              <div className="mb-10">
+                <h2 className="text-2xl font-black mb-6 tracking-tighter text-black dark:text-white">Payment Method</h2>
                 <div className="space-y-3">
                   {paymentMethods.map((method) => (
                     <motion.div
@@ -227,15 +166,15 @@ const Checkout = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setSelectedMethod(method.id as PaymentMethod)}
-                      className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      className={`p-5 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
                         selectedMethod === method.id
-                          ? 'border-primary bg-primary/5'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
+                          ? 'border-primary bg-primary/5 shadow-lg shadow-primary/10'
+                          : 'border-neutral-100 dark:border-zinc-800/50 hover:border-primary/50 hover:bg-neutral-50 dark:hover:bg-zinc-900/30'
                       }`}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                          selectedMethod === method.id ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700'
+                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                          selectedMethod === method.id ? 'bg-primary text-white' : 'bg-neutral-100 dark:bg-zinc-900 text-neutral-500'
                         }`}>
                           <method.icon className="h-5 w-5" />
                         </div>
@@ -259,8 +198,8 @@ const Checkout = () => {
               </div>
 
               {/* Billing Information */}
-              <div className="mb-6">
-                <h2 className="text-xl font-bold mb-4">Billing Information</h2>
+              <div className="mb-8">
+                <h2 className="text-2xl font-black mb-6 tracking-tighter text-black dark:text-white">Billing Information</h2>
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium mb-1 block">Full Name *</label>
@@ -333,7 +272,7 @@ const Checkout = () => {
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <div className="text-center p-8 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                    <div className="text-center p-10 bg-neutral-50 dark:bg-zinc-900/50 rounded-2xl border border-neutral-100 dark:border-zinc-800/50">
                       <CreditCard className="h-16 w-16 mx-auto mb-4 text-primary" />
                       <h3 className="text-lg font-semibold mb-2">Secure Card Payment</h3>
                       <p className="text-sm text-muted-foreground mb-6">
@@ -354,7 +293,7 @@ const Checkout = () => {
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <div className="text-center p-8 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                    <div className="text-center p-10 bg-neutral-50 dark:bg-zinc-900/50 rounded-2xl border border-neutral-100 dark:border-zinc-800/50">
                       <Wallet className="h-16 w-16 mx-auto mb-4 text-primary" />
                       <h3 className="text-lg font-semibold mb-2">PayPal Integration</h3>
                       <p className="text-sm text-muted-foreground mb-6">
@@ -375,17 +314,17 @@ const Checkout = () => {
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <div className="text-center p-6 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800 mb-4">
-                      <Banknote className="h-12 w-12 mx-auto mb-3 text-amber-600" />
-                      <h3 className="text-lg font-semibold mb-2">Cash on Delivery</h3>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="text-center p-8 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-900/50 mb-6">
+                      <Banknote className="h-14 w-14 mx-auto mb-4 text-amber-500" />
+                      <h3 className="text-xl font-black mb-2 text-amber-900 dark:text-amber-500">Cash on Delivery</h3>
+                      <p className="text-sm font-medium text-amber-700/70 dark:text-amber-500/70">
                         You will pay when your order is delivered to your address
                       </p>
                     </div>
                     <Button 
                       onClick={handleCashOrder}
                       disabled={isProcessingCash}
-                      className="w-full h-12 text-lg rounded-xl"
+                      className="w-full h-14 text-lg rounded-xl font-bold bg-black dark:bg-white text-white dark:text-black hover:scale-[1.02] transition-transform shadow-xl shadow-primary/20"
                     >
                       <span className="flex items-center justify-center gap-2">
                         <Lock className="h-4 w-4" /> {isProcessingCash ? 'Processing...' : 'Place Order'}
@@ -404,13 +343,13 @@ const Checkout = () => {
             animate="visible"
             transition={{ delay: 0.2 }}
           >
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 sticky top-24">
+            <div className="bg-white dark:bg-zinc-950 p-8 rounded-[2rem] shadow-xl shadow-black/5 dark:shadow-none border border-neutral-200 dark:border-zinc-800/50 sticky top-24">
               <div 
-                className="flex justify-between items-center mb-4 cursor-pointer"
+                className="flex justify-between items-center mb-6 cursor-pointer group"
                 onClick={() => setShowOrderSummary(!showOrderSummary)}
               >
-                <h2 className="text-xl font-bold">Order Summary</h2>
-                {showOrderSummary ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                <h2 className="text-2xl font-black tracking-tighter text-black dark:text-white">Order Summary</h2>
+                {showOrderSummary ? <ChevronUp className="h-6 w-6 text-neutral-400 group-hover:text-black dark:group-hover:text-white transition-colors" /> : <ChevronDown className="h-6 w-6 text-neutral-400 group-hover:text-black dark:group-hover:text-white transition-colors" />}
               </div>
 
               <AnimatePresence>
@@ -422,21 +361,23 @@ const Checkout = () => {
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
+                    <div className="space-y-4 mb-6 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                       {items.map((item) => (
-                        <div key={item.id} className="flex gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <div key={item.id} className="flex gap-4 p-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-zinc-900/50 transition-colors border border-transparent dark:hover:border-zinc-800/50">
                           {item.image && (
-                            <img 
-                              src={item.image} 
-                              alt={item.name}
-                              className="w-16 h-16 object-cover rounded-lg"
-                            />
+                            <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-neutral-100 dark:bg-zinc-900">
+                              <img 
+                                src={item.image} 
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
                           )}
-                          <div className="flex-1">
-                            <h3 className="font-medium text-sm line-clamp-1">{item.name}</h3>
-                            <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                          <div className="flex-1 flex flex-col justify-center">
+                            <h3 className="font-bold text-sm line-clamp-1 text-black dark:text-white">{item.name}</h3>
+                            <p className="text-xs font-semibold text-neutral-500">Qty: {item.quantity}</p>
                           </div>
-                          <div className="text-sm font-semibold">
+                          <div className="flex items-center text-sm font-black text-black dark:text-white">
                             ${(item.price * item.quantity).toFixed(2)}
                           </div>
                         </div>
@@ -447,26 +388,27 @@ const Checkout = () => {
               </AnimatePresence>
 
               {/* Coupon Code Input */}
-              <div className="mb-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <label className="text-sm font-medium mb-2 block">Discount Code</label>
-                <div className="flex gap-2">
+              <div className="mb-8 pt-6 border-t border-neutral-100 dark:border-zinc-800/50">
+                <label className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3 block">Discount Code</label>
+                <div className="flex gap-3">
                   <Input 
                     placeholder="Enter coupon code" 
                     value={couponCode}
+                    className="rounded-xl bg-neutral-50 dark:bg-zinc-900/50 border-neutral-200 dark:border-zinc-800 h-12 font-bold"
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                     disabled={!!appliedCoupon}
                   />
                   {appliedCoupon ? (
                     <Button variant="destructive" onClick={handleRemoveCoupon}>Remove</Button>
                   ) : (
-                    <Button onClick={handleApplyCoupon} disabled={!couponCode || isValidatingCoupon}>
+                    <Button onClick={handleApplyCoupon} disabled={!couponCode || isValidatingCoupon} className="h-12 rounded-xl font-bold px-6">
                       {isValidatingCoupon ? '...' : 'Apply'}
                     </Button>
                   )}
                 </div>
               </div>
 
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
+              <div className="border-t border-neutral-100 dark:border-zinc-800/50 pt-6 space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
                   <span>${total().toFixed(2)}</span>
@@ -485,20 +427,20 @@ const Checkout = () => {
                     <span>-${discount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
+                <div className="border-t border-neutral-100 dark:border-zinc-800/50 pt-4 mt-4">
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-lg">Total</span>
-                    <span className="text-2xl font-bold text-primary">
+                    <span className="font-black text-lg text-black dark:text-white uppercase tracking-tighter">Total</span>
+                    <span className="text-3xl font-black text-black dark:text-white">
                       ${finalTotal.toFixed(2)}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
-                <div className="flex items-center gap-2 text-green-700 dark:text-green-400 text-sm">
+              <div className="mt-8 p-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl border border-emerald-200 dark:border-emerald-500/20">
+                <div className="flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 text-sm">
                   <Lock className="h-4 w-4" />
-                  <span className="font-medium">Secure checkout guaranteed</span>
+                  <span className="font-bold">Secure checkout guaranteed</span>
                 </div>
               </div>
             </div>

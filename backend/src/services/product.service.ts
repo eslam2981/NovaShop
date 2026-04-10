@@ -161,3 +161,12 @@ export const deleteProduct = async (id: string) => {
     where: { id },
   });
 };
+
+export const getStoreStats = async () => {
+  const [productsCount, usersCount] = await Promise.all([
+    prisma.product.count(),
+    prisma.user.count(),
+  ]);
+
+  return { productsCount, usersCount };
+};

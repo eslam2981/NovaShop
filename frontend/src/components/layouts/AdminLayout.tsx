@@ -1,4 +1,4 @@
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/services/auth';
 import { useEffect, useState } from 'react';
@@ -19,12 +19,17 @@ const AdminLayout = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (!user || user.role !== 'ADMIN') {
-      navigate('/login');
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
+      // Fallback redirect for unauthorized access
+      if (location.pathname.startsWith('/admin')) {
+        navigate('/login', { replace: true });
+      }
     }
-  }, [user, navigate]);
+  }, [user, navigate, location]);
 
-  if (!user || user.role !== 'ADMIN') return null;
+  // We cannot return null or <Navigate> here during a logout because it destroys the DOM tree
+  // that Framer Motion's <AnimatePresence> is trying to animate out, causing the router to freeze.
+  // The useEffect above will handle the actual redirection.
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Analytics', path: '/admin' },
@@ -32,7 +37,9 @@ const AdminLayout = () => {
     { icon: FolderTree, label: 'Collections', path: '/admin/categories' },
     { icon: ShoppingCart, label: 'Orders', path: '/admin/orders' },
     { icon: Tag, label: 'Promotions', path: '/admin/coupons' },
-    { icon: Users, label: 'Customers', path: '/admin/users' },
+    ...(user?.role === 'OWNER' ? [
+      { icon: Users, label: 'Customers', path: '/admin/users' }
+    ] : [])
   ];
 
   const sidebarContent = (
@@ -62,11 +69,10 @@ const AdminLayout = () => {
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}
-              <div className={`relative flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 font-semibold ${
-                isActive
+              <div className={`relative flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 font-semibold ${isActive
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800/50'
-              }`}>
+                }`}>
                 <item.icon className={`h-5 w-5 shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'} ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                 <span className="tracking-wide text-sm">{item.label}</span>
               </div>
@@ -86,7 +92,7 @@ const AdminLayout = () => {
               <p className="text-xs text-muted-foreground truncate">{user?.email || 'admin@novashop.com'}</p>
             </div>
           </div>
-          
+
           <div className="flex flex-col gap-2">
             <Link to="/">
               <Button variant="outline" className="w-full justify-start rounded-xl h-10 border-neutral-300 dark:border-neutral-700 hover:bg-white dark:hover:bg-neutral-800 font-semibold">
@@ -96,14 +102,15 @@ const AdminLayout = () => {
             <Button
               variant="destructive"
               className="w-full justify-start rounded-xl h-10 font-semibold"
-              onClick={async () => {
-                try {
-                  await authService.logout();
-                } catch (error) {
-                  console.error('Logout error', error);
-                }
+              onClick={(e) => {
+                e.preventDefault();
+                // Fire and forget the backend logout so we don't block the UI
+                authService.logout().catch(console.error);
+
+                // First navigate so we can pass the state and avoid being trapped by the useEffect
+                navigate('/login', { state: { fromLogout: true }, replace: true });
+                // Then clear the store
                 logout();
-                navigate('/login', { state: { fromLogout: true } });
               }}
             >
               <LogOut className="mr-2 h-4 w-4" /> Sign Out
@@ -123,7 +130,7 @@ const AdminLayout = () => {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        
+
         {/* Mobile Header */}
         <header className="flex md:hidden h-16 items-center justify-between border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-xl px-4 z-30 sticky top-0">
           <div className="flex items-center gap-2">
@@ -178,9 +185,9 @@ const AdminLayout = () => {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="fixed inset-y-0 left-0 z-[100] flex w-[85vw] max-w-[320px] flex-col border-r border-neutral-800 bg-white dark:bg-[#09090b] shadow-[0_0_50px_rgba(0,0,0,0.5)] md:hidden"
             >
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="absolute top-4 right-4 z-50 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

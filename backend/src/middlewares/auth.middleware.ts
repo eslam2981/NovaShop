@@ -15,7 +15,7 @@ export const protect = async (req: Request, _res: Response, next: NextFunction) 
   }
 
   if (!token) {
-    return next(new AppError('يجب تسجيل الدخول للوصول إلى هذه الصفحة', 401));
+    return next(new AppError('You must be logged in to access this resource', 401));
   }
 
   try {
@@ -24,20 +24,20 @@ export const protect = async (req: Request, _res: Response, next: NextFunction) 
     const currentUser = await prisma.user.findUnique({ where: { id: decoded.id } });
 
     if (!currentUser) {
-      return next(new AppError('المستخدم غير موجود. يرجى تسجيل الدخول مرة أخرى', 401));
+      return next(new AppError('The user no longer exists. Please log in again', 401));
     }
 
     (req as any).user = currentUser;
     next();
   } catch (error) {
-    return next(new AppError('رمز الدخول غير صالح. يرجى تسجيل الدخول مرة أخرى', 401));
+    return next(new AppError('Invalid or expired token. Please log in again', 401));
   }
 };
 
 export const restrictTo = (...roles: string[]) => {
   return (req: Request, _res: Response, next: NextFunction) => {
     if (!roles.includes((req as any).user.role)) {
-      return next(new AppError('ليس لديك صلاحية للوصول إلى هذه الصفحة', 403));
+      return next(new AppError('You do not have permission to perform this action', 403));
     }
     next();
   };

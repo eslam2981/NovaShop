@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { userService, User } from '@/services/user';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +18,7 @@ const buildSchema = (mode: ModalMode) =>
   z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     email: z.string().email('Invalid email'),
-    role: z.enum(['USER', 'ADMIN']),
+    role: z.enum(['USER', 'ADMIN', 'OWNER']),
     password:
       mode === 'create'
         ? z.string().min(6, 'Password must be at least 6 characters')
@@ -50,7 +51,7 @@ function UserModalForm({
         : {
             name: initialUser?.name ?? '',
             email: initialUser?.email ?? '',
-            role: initialUser?.role === 'ADMIN' ? 'ADMIN' : 'USER',
+            role: initialUser?.role === 'ADMIN' ? 'ADMIN' : initialUser?.role === 'OWNER' ? 'OWNER' : 'USER',
             password: '',
           },
   });
@@ -69,7 +70,7 @@ function UserModalForm({
         const payload: {
           name: string;
           email: string;
-          role: 'USER' | 'ADMIN';
+          role: 'USER' | 'ADMIN' | 'OWNER';
           password?: string;
         } = {
           name: data.name,
@@ -84,10 +85,13 @@ function UserModalForm({
       }
       onDone();
     } catch (err: unknown) {
-      const msg =
+      let msg =
         err && typeof err === 'object' && 'response' in err
           ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
           : undefined;
+      if (typeof msg === 'string') {
+        msg = msg.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '').trim();
+      }
       toast.error(msg || 'Request failed');
     }
   };
@@ -130,15 +134,20 @@ function UserModalForm({
           {errors.email && <p className="mt-1 text-xs text-red-500 font-bold">{errors.email.message}</p>}
         </div>
         <div>
-          <label className="mb-2 block text-sm font-semibold text-neutral-600 dark:text-neutral-300">
-            Role
+          <label className="mb-2 flex justify-between items-center text-sm font-semibold text-neutral-600 dark:text-neutral-300">
+            <span>Role</span>
+            {useAuthStore.getState().user?.role !== 'OWNER' && (
+              <span className="text-xs text-amber-500 flex items-center gap-1"><Shield className="w-3 h-3"/> Owner access required to edit</span>
+            )}
           </label>
           <select
             {...register('role')}
-            className="flex h-11 w-full rounded-xl border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+            disabled={useAuthStore.getState().user?.role !== 'OWNER'}
+            className="flex h-11 w-full rounded-xl border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="USER">User</option>
             <option value="ADMIN">Admin</option>
+            <option value="OWNER">Owner</option>
           </select>
           {errors.role && <p className="mt-1 text-xs text-red-500 font-bold">{errors.role.message}</p>}
         </div>
@@ -175,6 +184,10 @@ const AdminUsers = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<ModalMode>('create');
   const [editingUser, setEditingUser] = useState<User | null>(null);
+
+  if (currentUser?.role !== 'OWNER') {
+    return <Navigate to="/admin" replace />;
+  }
 
   useEffect(() => {
     fetchUsers();
@@ -220,10 +233,13 @@ const AdminUsers = () => {
       toast.success('User removed');
       fetchUsers();
     } catch (err: unknown) {
-      const msg =
+      let msg =
         err && typeof err === 'object' && 'response' in err
           ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
           : undefined;
+      if (typeof msg === 'string') {
+        msg = msg.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '').trim();
+      }
       toast.error(msg || 'Delete failed');
     }
   };
@@ -313,7 +329,7 @@ const AdminUsers = () => {
                   </td>
                 </tr>
               ) : (
-                users.map((user, i) => (
+                users.map((user) => (
                   <tr
                     key={user.id}
                     className="hover:bg-neutral-50/50 dark:hover:bg-zinc-900/50 transition-colors group"
@@ -330,12 +346,16 @@ const AdminUsers = () => {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
-                          user.role === 'ADMIN'
+                          user.role === 'OWNER'
+                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                            : user.role === 'ADMIN'
                             ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
                             : 'bg-neutral-500/10 text-neutral-600 dark:text-neutral-400'
                         }`}
                       >
-                        {user.role === 'ADMIN' ? (
+                        {user.role === 'OWNER' ? (
+                          <Shield className="h-3.5 w-3.5 fill-amber-500/20" />
+                        ) : user.role === 'ADMIN' ? (
                           <Shield className="h-3.5 w-3.5" />
                         ) : (
                           <UserIcon className="h-3.5 w-3.5" />
@@ -360,9 +380,9 @@ const AdminUsers = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="rounded-xl text-red-500 hover:bg-red-500/10"
+                          className="rounded-xl text-red-500 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:bg-transparent"
                           onClick={() => handleDelete(user.id)}
-                          disabled={currentUser?.id === user.id}
+                          disabled={currentUser?.id === user.id || (user.role === 'OWNER' && currentUser?.role !== 'OWNER')}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

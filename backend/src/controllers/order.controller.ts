@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { getOrders, getOrderById, getAllOrders, updateOrderStatus, createOrder as createOrderService } from '../services/order.service';
+import { getOrders, getOrderById, getAllOrders, updateOrderStatus, createOrder as createOrderService, deleteOrder } from '../services/order.service';
 import { safeParam } from '../utils/safeParam';
 
 const getUserId = (req: Request) => {
@@ -65,6 +65,15 @@ export const updateStatus = async (req: Request, res: Response, next: NextFuncti
     const { status } = req.body;
     const order = await updateOrderStatus(safeParam(req.params.id), status);
     res.status(200).json({ status: 'success', data: { order } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteOrderAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await deleteOrder(safeParam(req.params.id));
+    res.status(200).json({ status: 'success', data: result });
   } catch (error) {
     next(error);
   }

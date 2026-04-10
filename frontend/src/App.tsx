@@ -7,11 +7,13 @@ import { pageTransition } from './lib/animations';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import ProductList from './pages/ProductList';
 import ProductDetails from './pages/ProductDetails';
 import CartPage from './pages/Cart';
 import Checkout from './pages/Checkout';
 import OrdersPage from './pages/Orders';
+import OrderTracking from './pages/OrderTracking';
 import Wishlist from './pages/Wishlist';
 import AdminLayout from './components/layouts/AdminLayout';
 import MainLayout from './components/layouts/MainLayout';
@@ -89,6 +91,16 @@ function AnimatedRoutes() {
             <MainLayout><OrdersPage /></MainLayout>
           </motion.div>
         } />
+        <Route path="/orders/track/:id" element={
+          <motion.div
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            variants={pageTransition}
+          >
+            <MainLayout><OrderTracking /></MainLayout>
+          </motion.div>
+        } />
         
         {/* Auth Routes (No Layout or Custom Layout) */}
         <Route path="/login" element={
@@ -109,6 +121,16 @@ function AnimatedRoutes() {
             variants={pageTransition}
           >
             <Register />
+          </motion.div>
+        } />
+        <Route path="/forgot-password" element={
+          <motion.div
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            variants={pageTransition}
+          >
+            <ForgotPassword />
           </motion.div>
         } />
         <Route path="/wishlist" element={

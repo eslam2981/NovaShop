@@ -1,5 +1,5 @@
 import express from 'express';
-import { create, getAll, getOne, update, remove } from '../controllers/product.controller';
+import { create, getAll, getOne, update, remove, getPublicStats } from '../controllers/product.controller';
 import { protect, restrictTo } from '../middlewares/auth.middleware';
 import { z } from 'zod';
 
@@ -11,7 +11,7 @@ const productSchema = z.object({
   price: z.number().positive(),
   stock: z.number().int().nonnegative(),
   categoryId: z.string().min(1),
-  images: z.array(z.string().url()).optional(),
+  images: z.array(z.string()).optional(),
   salePrice: z.number().nullable().optional(),
   saleEndDate: z.string().nullable().optional(),
 });
@@ -22,7 +22,7 @@ const updateProductSchema = z.object({
   price: z.number().positive().optional(),
   stock: z.number().int().nonnegative().optional(),
   categoryId: z.string().min(1).optional(),
-  images: z.array(z.string().url()).optional(),
+  images: z.array(z.string()).optional(),
   salePrice: z.number().nullable().optional(),
   saleEndDate: z.string().nullable().optional(),
 });
@@ -41,12 +41,13 @@ const validate = (schema: z.ZodSchema) => (req: express.Request, res: express.Re
 };
 
 // Public routes
+router.get('/stats/public', getPublicStats);
 router.get('/', getAll);
 router.get('/:id', getOne);
 
 // Admin routes - require authentication and admin role
-router.post('/', protect, restrictTo('ADMIN'), validate(productSchema), create);
-router.patch('/:id', protect, restrictTo('ADMIN'), validate(updateProductSchema), update);
-router.delete('/:id', protect, restrictTo('ADMIN'), remove);
+router.post('/', protect, restrictTo('ADMIN', 'OWNER'), validate(productSchema), create);
+router.patch('/:id', protect, restrictTo('ADMIN', 'OWNER'), validate(updateProductSchema), update);
+router.delete('/:id', protect, restrictTo('OWNER'), remove);
 
 export default router;

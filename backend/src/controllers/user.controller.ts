@@ -51,6 +51,12 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     // Prevent admin from deleting themselves
     const currentUser = (req as any).user;
     const targetId = safeParam(req.params.id);
+    
+    // Only OWNER can change roles
+    if (req.body.role && currentUser.role !== 'OWNER') {
+      return next(new AppError('Only the OWNER can change user roles', 403));
+    }
+    
     if (targetId === currentUser.id && req.body.role && req.body.role !== currentUser.role) {
       return next(new AppError('You cannot change your own role', 400));
     }
@@ -67,11 +73,18 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Prevent admin from deleting themselves
     const currentUser = (req as any).user;
     const targetId = safeParam(req.params.id);
+    
+    // Prevent admin from deleting themselves
     if (targetId === currentUser.id) {
       return next(new AppError('You cannot delete your own account', 400));
+    }
+    
+    // Prevent non-owners from deleting an owner
+    const userToDie = await userService.getUserById(targetId);
+    if (userToDie && userToDie.role === 'OWNER' && currentUser.role !== 'OWNER') {
+      return next(new AppError('Only the OWNER can delete an owner account', 403));
     }
     
     await userService.deleteUser(targetId);

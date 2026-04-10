@@ -9,15 +9,13 @@ router.post('/validate', couponController.validateCoupon);
 
 // Admin routes
 router.use(protect);
-router.use(restrictTo('ADMIN'));
 
-router.route('/')
-  .get(couponController.getCoupons)
-  .post(couponController.createCoupon);
+// Admin & Owner can read and modify
+router.get('/', restrictTo('ADMIN', 'OWNER'), couponController.getCoupons);
+router.post('/', restrictTo('ADMIN', 'OWNER'), couponController.createCoupon);
+router.patch('/:id/status', restrictTo('ADMIN', 'OWNER'), couponController.toggleStatus);
 
-router.route('/:id')
-  .delete(couponController.deleteCoupon);
-
-router.patch('/:id/status', couponController.toggleStatus);
+// Only Owner can delete
+router.delete('/:id', restrictTo('OWNER'), couponController.deleteCoupon);
 
 export default router;
